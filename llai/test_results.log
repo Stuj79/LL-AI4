@@ -1,0 +1,22 @@
+
+=== Testing categorize_content_item ===
+
+Testing with dictionary input:
+Result type: <class 'dict'>
+Result: {'practice_area': 'Estate Law', 'audience': 'Potential Clients', 'format': 'Article', 'categorization_confidence': 0.95}
+
+Testing with JSON string input:
+Result type: <class 'dict'>
+Result: {'practice_area': 'Estate Law', 'audience': 'Potential Clients', 'format': 'Article', 'categorization_confidence': 0.95}
+
+=== Testing evaluate_content_quality ===
+
+Testing with dictionary input:
+Result type: <class 'dict'>
+Result: {'quality_rating': 4, 'currency_status': 'Up-to-date', 'strategic_alignment': 4, 'improvement_suggestions': ['Add more case studies', 'Include client testimonials']}
+
+Testing with JSON string input:
+Result type: <class 'dict'>
+Result: {'quality_rating': 4, 'currency_status': 'Up-to-date', 'strategic_alignment': 4, 'improvement_suggestions': ['Add more case studies', 'Include client testimonials']}
+
+=== Tests Completed Successfully ===
