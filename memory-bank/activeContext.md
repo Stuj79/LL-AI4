@@ -3,9 +3,16 @@
 This document tracks the current state of work, recent decisions, and immediate next steps. It's a dynamic snapshot of the project's momentum.
 
 ## 1. Current Focus
-Phase 1, Week 4: Testing Infrastructure Setup - COMPLETED. Ready to proceed to Phase 2, Week 5: Core Agent Abstraction.
+Phase 2, Week 5: Core Agent Abstraction - IN PROGRESS. Implementing LegalMarketingBaseAgent and migrating StakeholderIdentificationAgent.
 
 ## 2. Recent Changes & Decisions
+
+**Week 5 Planning & Architecture (2025-05-26):**
+*   **Agent Migration Strategy:** Established migration order prioritizing StakeholderIdentificationAgent first for pattern establishment
+*   **Legal Marketing Domain Research:** Conducted comprehensive research on legal marketing AI requirements including compliance, disclaimers, and ethical considerations
+*   **LegalMarketingBaseAgent Design:** Architected base agent class with disclaimer management, compliance checking, and confidentiality handling
+*   **Agent Factory Pattern:** Designed factory pattern for consistent agent instantiation with legal-specific configurations
+*   **Context Providers Architecture:** Planned DisclaimerProvider, AdvertisingRuleProvider, and EthicalGuidelineProvider for domain-specific context injection
 
 **Week 4 Completion (2025-05-25):**
 *   **Testing Strategy Documentation:** Created comprehensive testing strategy in `memory-bank/testingStrategy.md`
@@ -28,6 +35,10 @@ Phase 1, Week 4: Testing Infrastructure Setup - COMPLETED. Ready to proceed to P
 *   **Knowledge Consolidation:** Processing raw learnings into actionable insights
 
 **Key Technical Decisions:**
+*   **Agent Migration Order:** StakeholderIdentificationAgent → Platform Inventory → ContentInventoryAgent → Gap Analysis Agents
+*   **Legal Marketing Base Agent:** Extends Atomic Agents BaseAgent with disclaimer management, compliance checking, and confidentiality handling
+*   **Context Provider Pattern:** Injectable providers for disclaimers, advertising rules, and ethical guidelines
+*   **Agent Factory Pattern:** Centralized agent instantiation with configuration management and LLM client injection
 *   Established comprehensive testing philosophy for non-deterministic AI systems
 *   Implemented mock LLM providers with pattern matching and error simulation capabilities
 *   Created performance profiling infrastructure for baseline establishment and regression detection
@@ -35,11 +46,13 @@ Phase 1, Week 4: Testing Infrastructure Setup - COMPLETED. Ready to proceed to P
 
 ## 3. Next Steps
 
-**Immediate (Week 5 Planning):**
-*   [ ] Design Legal Marketing Base Agent extending Atomic Agents BaseAgent
+**Immediate (Week 5 Implementation):**
+*   [ ] Implement LegalMarketingBaseAgent class with disclaimer management and compliance features
+*   [ ] Create LegalMarketingAgentConfig extending BaseAgentConfig
 *   [ ] Implement Agent Factory Pattern for consistent agent instantiation
-*   [ ] Create agent configuration patterns with legal-specific context providers
-*   [ ] Establish agent testing patterns using the new testing infrastructure
+*   [ ] Create context providers (DisclaimerProvider, AdvertisingRuleProvider, EthicalGuidelineProvider)
+*   [ ] Migrate StakeholderIdentificationAgent as first concrete implementation
+*   [ ] Establish comprehensive testing patterns for legal marketing agents
 
 **Short-term (Phase 2 Execution):**
 *   [ ] Migrate discovery phase agents (StakeholderIdentificationAgent, Platform Inventory)
@@ -55,10 +68,11 @@ Phase 1, Week 4: Testing Infrastructure Setup - COMPLETED. Ready to proceed to P
 
 ## 4. Active Considerations & Questions
 
-**Agent Migration Strategy:**
-*   Which agent should be migrated first to establish patterns and validate the approach?
-*   How to structure agent inheritance hierarchy for legal marketing domain?
-*   What context providers are needed for legal compliance and taxonomy integration?
+**Agent Implementation Strategy:**
+*   How to balance legal compliance requirements with performance and usability?
+*   What level of human-in-the-loop validation is needed for different agent types?
+*   How to structure disclaimer and compliance checking without impacting response times?
+*   What audit trail requirements are needed for legal marketing AI decisions?
 
 **Testing Implementation:**
 *   How to integrate the new testing infrastructure with existing CI/CD processes?
@@ -95,6 +109,24 @@ Phase 1, Week 4: Testing Infrastructure Setup - COMPLETED. Ready to proceed to P
 *   Code should be self-documenting with clear naming and structure
 
 ## 6. Learnings & Insights (Current Session)
+
+**Legal Marketing AI Domain Requirements:**
+*   Legal marketing AI requires specialized compliance features including automatic disclaimer injection, advertising rule validation, and confidentiality protection
+*   Accuracy safeguards are critical - all AI-generated legal content requires human review before publication
+*   Bias mitigation essential to avoid discriminatory targeting based on protected characteristics
+*   Audit trails and transparency requirements are more stringent than general marketing AI applications
+
+**Agent Architecture Design Patterns:**
+*   Base agent classes should provide domain-specific hooks and abstractions while maintaining Atomic Agents compatibility
+*   Context providers enable clean separation of domain knowledge from agent logic
+*   Factory patterns essential for managing complex agent configurations and dependencies
+*   Legal marketing agents need specialized output schemas including compliance status and applied disclaimers
+
+**Migration Strategy Insights:**
+*   Starting with simpler, self-contained agents (StakeholderIdentificationAgent) enables pattern validation before tackling complex agents
+*   Establishing base classes and patterns early accelerates subsequent agent migrations
+*   Legal domain requirements significantly impact agent design and must be considered from the foundation level
+*   Testing patterns for legal marketing AI must account for compliance validation and ethical considerations
 
 **Testing Infrastructure Development:**
 *   Comprehensive testing strategy significantly improves confidence in migration process
