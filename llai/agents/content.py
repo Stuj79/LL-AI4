@@ -1,4 +1,4 @@
-from legion import agent, tool
+# from legion import agent, tool # TODO: Remove Legion dependency, refactor agent
 from typing import List, Dict
 from pydantic import BaseModel, Field
 import json

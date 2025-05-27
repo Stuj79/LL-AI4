@@ -79,6 +79,38 @@ class APIError(AppBaseException):
     request_method: str = Field(..., description="HTTP method used")
     response_body: Optional[str] = Field(None, description="Response body from the API")
 
+class LegalMarketingAgentErrorSchema(AppBaseException):
+    """Schema for legal marketing specific errors."""
+    error_type: str = Field("LegalMarketingAgentError", description="Type of error")
+    # Add any specific fields relevant to legal marketing errors if needed later
+    # For example:
+    # compliance_area: Optional[str] = Field(None, description="Specific compliance area related to the error")
+
+class ComplianceValidationErrorSchema(AppBaseException):
+    """Schema for compliance validation errors."""
+    error_type: str = Field("ComplianceValidationError", description="Type of error")
+    jurisdiction: Optional[str] = Field(None, description="Jurisdiction where validation failed")
+    marketing_channel: Optional[str] = Field(None, description="Marketing channel being validated")
+    violations_count: Optional[int] = Field(None, description="Number of violations found")
+
+class DisclaimerInjectionErrorSchema(AppBaseException):
+    """Schema for disclaimer injection errors."""
+    error_type: str = Field("DisclaimerInjectionError", description="Type of error")
+    content_type: Optional[str] = Field(None, description="Type of content where injection failed")
+    disclaimer_count: Optional[int] = Field(None, description="Number of disclaimers that failed to inject")
+
+class StakeholderIdentificationErrorSchema(AppBaseException):
+    """Schema for stakeholder identification specific errors."""
+    error_type: str = Field("StakeholderIdentificationError", description="Type of error")
+    stakeholder_type: Optional[str] = Field(None, description="Type of stakeholder being identified")
+    identification_stage: Optional[str] = Field(None, description="Stage of identification where error occurred")
+
+class ContextProviderErrorSchema(AppBaseException):
+    """Schema for context provider errors."""
+    error_type: str = Field("ContextProviderError", description="Type of error")
+    provider_type: Optional[str] = Field(None, description="Type of context provider that failed")
+    operation: Optional[str] = Field(None, description="Operation that was being performed")
+
 # --- Exception Classes ---
 
 class AtomicException(Exception):
@@ -118,6 +150,34 @@ class AtomicJSONParsingError(AtomicException):
 
 class AtomicAPIError(AtomicException):
     """Exception for API errors."""
+    pass
+
+class LegalMarketingAgentError(AtomicException):
+    """Exception for legal marketing specific errors."""
+    pass
+
+class ComplianceValidationError(AtomicException):
+    """Exception for compliance validation errors."""
+    pass
+
+class DisclaimerInjectionError(AtomicException):
+    """Exception for disclaimer injection errors."""
+    pass
+
+class StakeholderIdentificationError(AtomicException):
+    """Exception for stakeholder identification specific errors."""
+    pass
+
+class ContextProviderError(AtomicException):
+    """Exception for context provider errors."""
+    pass
+
+class AgentFactoryError(AtomicException):
+    """Exception for agent factory errors."""
+    pass
+
+class LLMClientError(AtomicException):
+    """Exception for LLM client errors."""
     pass
 
 # --- Error Handler Functions ---

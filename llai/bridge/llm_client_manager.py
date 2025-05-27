@@ -53,13 +53,36 @@ class MockLLMClientManager(LLMClientManager):
     def get_client(self, model_name: str) -> Any:
         """Get a mock client for the specified model."""
         if model_name not in self.clients:
-            # Return a mock client object
-            self.clients[model_name] = type('MockClient', (), {
-                'model': model_name,
-                'generate': lambda self, prompt: f"Mock response for: {prompt[:50]}...",
-                'chat': lambda self, messages: f"Mock chat response for {len(messages)} messages"
-            })()
-            logger.debug(f"Created mock client for model: {model_name}")
+            # Create a mock Instructor client that mimics the real interface
+            try:
+                import instructor
+                
+                # Create a mock client that looks like an Instructor client
+                class MockInstructorClient:
+                    def __init__(self, model_name: str):
+                        self.model = model_name
+                        self._client = type('MockOpenAIClient', (), {})()
+                    
+                    def chat_completions_create(self, **kwargs):
+                        """Mock chat completions create method."""
+                        return f"Mock Instructor response for model: {self.model}"
+                    
+                    def completions_create(self, **kwargs):
+                        """Mock completions create method."""
+                        return f"Mock Instructor completion for model: {self.model}"
+                
+                self.clients[model_name] = MockInstructorClient(model_name)
+                logger.debug(f"Created mock Instructor client for model: {model_name}")
+                
+            except ImportError:
+                # Fallback to simple mock if instructor not available
+                self.clients[model_name] = type('MockClient', (), {
+                    'model': model_name,
+                    'generate': lambda self, prompt: f"Mock response for: {prompt[:50]}...",
+                    'chat': lambda self, messages: f"Mock chat response for {len(messages)} messages"
+                })()
+                logger.debug(f"Created simple mock client for model: {model_name}")
+                
         return self.clients[model_name]
     
     def get_default_client(self) -> Any:
@@ -221,82 +244,62 @@ class AtomicAgentsLLMClientManager(LLMClientManager):
     def _create_openai_client(self, model_name: str) -> Any:
         """Create an OpenAI client for Atomic Agents."""
         try:
-            # Import OpenAI client from Atomic Agents
-            from atomic_agents.lib.components.agent_memory import AgentMemory
-            from atomic_agents.agents.base_agent import BaseAgent
+            # Import required dependencies
+            import instructor
+            from openai import OpenAI
             
-            # For now, we'll create a simple client wrapper
-            # In a full implementation, this would use the actual Atomic Agents OpenAI integration
+            # Create OpenAI client
+            openai_client = OpenAI(api_key=self.llm_config.openai_api_key)
             
-            class OpenAIClientWrapper:
-                def __init__(self, api_key: str, model: str, config: LLMProviderConfig):
-                    self.api_key = api_key
-                    self.model = model
-                    self.config = config
-                    # In real implementation, initialize actual OpenAI client here
-                    logger.debug(f"OpenAI client wrapper created for model: {model}")
-                
-                async def generate(self, prompt: str, **kwargs) -> str:
-                    """Generate response using OpenAI API."""
-                    # This is a placeholder - real implementation would call OpenAI API
-                    logger.info(f"Generating response with OpenAI model: {self.model}")
-                    return f"[OpenAI {self.model}] Response to: {prompt[:100]}..."
-                
-                async def chat(self, messages: list, **kwargs) -> str:
-                    """Chat completion using OpenAI API."""
-                    # This is a placeholder - real implementation would call OpenAI API
-                    logger.info(f"Chat completion with OpenAI model: {self.model}")
-                    return f"[OpenAI {self.model}] Chat response to {len(messages)} messages"
+            # Create Instructor client (this is what Atomic Agents expects)
+            instructor_client = instructor.from_openai(openai_client)
             
-            return OpenAIClientWrapper(
-                api_key=self.llm_config.openai_api_key,
-                model=model_name,
-                config=self.llm_config
-            )
+            logger.debug(f"Instructor OpenAI client created for model: {model_name}")
+            return instructor_client
             
         except ImportError as e:
+            logger.error(f"Failed to import required dependencies: {str(e)}")
             raise LLMClientError(
                 error_type="DEPENDENCY_ERROR",
-                message="Failed to import required OpenAI dependencies",
+                message="Failed to import required OpenAI/Instructor dependencies",
+                context={"model": model_name, "error": str(e)}
+            )
+        except Exception as e:
+            logger.error(f"Failed to create OpenAI client: {str(e)}")
+            raise LLMClientError(
+                error_type="CLIENT_CREATION_FAILED",
+                message="Failed to create OpenAI client",
                 context={"model": model_name, "error": str(e)}
             )
     
     def _create_anthropic_client(self, model_name: str) -> Any:
         """Create an Anthropic client for Atomic Agents."""
         try:
-            # Import Anthropic client from Atomic Agents
-            # For now, we'll create a simple client wrapper
+            # Import required dependencies
+            import instructor
+            from anthropic import Anthropic
             
-            class AnthropicClientWrapper:
-                def __init__(self, api_key: str, model: str, config: LLMProviderConfig):
-                    self.api_key = api_key
-                    self.model = model
-                    self.config = config
-                    # In real implementation, initialize actual Anthropic client here
-                    logger.debug(f"Anthropic client wrapper created for model: {model}")
-                
-                async def generate(self, prompt: str, **kwargs) -> str:
-                    """Generate response using Anthropic API."""
-                    # This is a placeholder - real implementation would call Anthropic API
-                    logger.info(f"Generating response with Anthropic model: {self.model}")
-                    return f"[Anthropic {self.model}] Response to: {prompt[:100]}..."
-                
-                async def chat(self, messages: list, **kwargs) -> str:
-                    """Chat completion using Anthropic API."""
-                    # This is a placeholder - real implementation would call Anthropic API
-                    logger.info(f"Chat completion with Anthropic model: {self.model}")
-                    return f"[Anthropic {self.model}] Chat response to {len(messages)} messages"
+            # Create Anthropic client
+            anthropic_client = Anthropic(api_key=self.llm_config.anthropic_api_key)
             
-            return AnthropicClientWrapper(
-                api_key=self.llm_config.anthropic_api_key,
-                model=model_name,
-                config=self.llm_config
-            )
+            # Create Instructor client (this is what Atomic Agents expects)
+            instructor_client = instructor.from_anthropic(anthropic_client)
+            
+            logger.debug(f"Instructor Anthropic client created for model: {model_name}")
+            return instructor_client
             
         except ImportError as e:
+            logger.error(f"Failed to import required dependencies: {str(e)}")
             raise LLMClientError(
                 error_type="DEPENDENCY_ERROR",
-                message="Failed to import required Anthropic dependencies",
+                message="Failed to import required Anthropic/Instructor dependencies",
+                context={"model": model_name, "error": str(e)}
+            )
+        except Exception as e:
+            logger.error(f"Failed to create Anthropic client: {str(e)}")
+            raise LLMClientError(
+                error_type="CLIENT_CREATION_FAILED",
+                message="Failed to create Anthropic client",
                 context={"model": model_name, "error": str(e)}
             )
     

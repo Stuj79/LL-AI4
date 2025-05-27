@@ -3,9 +3,15 @@
 This document tracks the current state of work, recent decisions, and immediate next steps. It's a dynamic snapshot of the project's momentum.
 
 ## 1. Current Focus
-Phase 2, Week 6: Discovery Phase Agent Migration - Task 1 COMPLETED. StakeholderIdentificationAgent now has full real LLM integration. Ready for remaining Week 6 tasks.
+Phase 2, Week 6: Discovery Phase Agent Migration - `run_stakeholder_agent.py` example script is now fully functional after resolving client initialization errors. Ready for remaining Week 6 tasks (Migrate Platform Inventory Logic).
 
 ## 2. Recent Changes & Decisions
+
+**Fix `run_stakeholder_agent.py` Execution (2025-05-27):**
+*   **Resolved `ValidationError`:** Modified `llai/bridge/llm_client_manager.py` to ensure `_create_openai_client` and `_create_anthropic_client` methods return actual `instructor.Instructor` client instances, not custom wrappers. This fixed the Pydantic validation error for the `client` field in `StakeholderIdentificationAgentConfig`.
+*   **Corrected Mock Client:** Updated `MockLLMClientManager` in `llai/bridge/llm_client_manager.py` to also return a mock `Instructor`-compatible client for consistency in testing.
+*   **Script Update:** Adjusted `examples/run_stakeholder_agent.py` to correctly obtain the LLM client from the factory's client manager and pass it during `StakeholderIdentificationAgentConfig` instantiation. Also fixed a minor `AttributeError` when printing the LLM client type.
+*   **Outcome:** The `examples/run_stakeholder_agent.py` script now executes successfully, demonstrating correct agent instantiation and LLM client integration.
 
 **Week 6 Task 1 Completion (2025-05-27):**
 *   **Real LLM Client Manager:** Created comprehensive LLM client manager in `llai/bridge/llm_client_manager.py` with provider abstraction supporting OpenAI and Anthropic
@@ -125,6 +131,18 @@ Phase 2, Week 6: Discovery Phase Agent Migration - Task 1 COMPLETED. Stakeholder
 *   Code should be self-documenting with clear naming and structure
 
 ## 6. Learnings & Insights (Current Session)
+
+**LLM Client Initialization & Pydantic Validation:**
+*   Pydantic models (like agent configurations) are validated at the moment of their instantiation. If a field (e.g., `client`) has specific type requirements (e.g., must be an `Instructor` instance), that requirement must be met *during* `__init__`, not later by a factory or other mechanism.
+*   LLM client managers must return the precise client type expected by the consuming framework (e.g., `instructor.Instructor` for Atomic Agents `BaseAgentConfig`), not just a wrapper with a similar interface, to pass Pydantic validation.
+*   When debugging `ValidationError` for client types, verify the actual type being passed versus the type hint in the Pydantic model.
+
+**Debugging Agent Instantiation:**
+*   A multi-step debugging process was effective:
+    1.  Initial fix attempt: Pass client from factory to config in the example script. (Still failed due to wrapper type).
+    2.  Deeper fix: Modify `LLMClientManager` to return correct `Instructor` instances.
+    3.  Consistency fix: Update `MockLLMClientManager` to also provide `Instructor`-like mocks.
+    4.  Final script adjustment: Ensure the example script correctly uses the now-valid client from the manager.
 
 **Real LLM Integration Patterns:**
 *   Provider abstraction enables seamless switching between OpenAI, Anthropic, and future LLM providers

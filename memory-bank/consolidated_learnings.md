@@ -172,7 +172,24 @@ This file contains curated, summarized, and actionable insights derived from `ra
 - Provide realistic test data that covers various jurisdictions and content types
 - *Rationale:* Enables reliable testing of legal marketing features, reduces external dependencies, allows comprehensive error scenario testing
 
+## LLM Integration & Pydantic Validation Patterns
+
+**Pattern: Exact Client Type for Pydantic Validation at Instantiation**
+- Pydantic models (e.g., agent configurations) perform type validation for their fields at the moment of object instantiation (`__init__`).
+- If a field is type-hinted to require a specific class instance (e.g., `instructor.Instructor` for an LLM client), the object provided during instantiation must be of that exact type or a compatible subtype. Custom wrappers, even with identical interfaces, may fail this validation if they are not part of the expected type hierarchy.
+- *Rationale:* This ensures strict type safety from the outset, preventing runtime errors that could occur if type compatibility was only interface-deep. It helps catch integration issues early in the development lifecycle.
+
+**Pattern: Debugging Pydantic Type ValidationErrors Systematically**
+- When encountering a Pydantic `ValidationError` that indicates a type mismatch for an object field (e.g., "Input should be an instance of X, got Y"), focus on the `input_type` (Y) reported in the error message.
+- In debugging, explicitly check `type(input_value)` of the object being passed to confirm its actual class, comparing it against the Pydantic model's type hint for that field.
+- *Rationale:* This provides a direct way to identify the source of the type mismatch, which is crucial when dealing with complex object creation, factories, or dependency injection where the actual type might not be immediately obvious.
+
+**Pattern: High-Fidelity Mock Clients in Type-Strict Environments**
+- In systems employing strict type validation (like Pydantic-based configurations), mock objects (e.g., for LLM clients, database connections) should not only replicate the interface but also, where feasible, the type hierarchy of their real counterparts.
+- For instance, if a production component expects an `instructor.Instructor` client, the corresponding mock client used in tests should ideally be an instance of a class that is either `Instructor` or a recognized subtype, or at least pass `isinstance()` checks if the validation relies on them.
+- *Rationale:* This allows test environments to more accurately simulate production conditions, including Pydantic's type validation. It helps catch type-related integration issues during testing that might otherwise only appear in production.
+
 ---
 
-**Last Updated:** 2025-05-27  
-**Source Material:** Raw reflection logs from Weeks 1-5 of Legion to Atomic Agents migration
+**Last Updated:** 2025-05-27
+**Source Material:** Raw reflection logs from Weeks 1-5 of Legion to Atomic Agents migration, and entry from 2025-05-27 regarding `run_stakeholder_agent.py` fix.

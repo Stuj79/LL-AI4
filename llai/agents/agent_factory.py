@@ -30,7 +30,7 @@ from llai.agents.context_providers import (
     AdvertisingRuleProviderConfig,
     EthicalGuidelineProviderConfig
 )
-from llai.config.settings import AppConfig
+from llai.config.settings import ApplicationConfig
 from llai.utils.exceptions_atomic import AgentFactoryError
 from llai.utils.logging_setup import get_logger
 from llai.bridge.llm_client_manager import (
@@ -69,7 +69,7 @@ class LegalAgentFactory:
     
     def __init__(
         self,
-        global_config: AppConfig,
+        global_config: ApplicationConfig,
         llm_client_manager: LLMClientManager,
         factory_config: Optional[LegalAgentFactoryConfig] = None
     ):
@@ -354,7 +354,7 @@ class LegalAgentFactory:
 # --- Factory Builder ---
 
 def create_legal_agent_factory(
-    global_config: AppConfig,
+    global_config: ApplicationConfig,
     use_mock_providers: bool = False,
     use_mock_llm: bool = False,
     **factory_config_kwargs
