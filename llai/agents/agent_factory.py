@@ -5,9 +5,8 @@ This module provides the factory pattern implementation for consistent instantia
 of legal marketing agents with proper dependency injection and configuration management.
 """
 
-from typing import Dict, Any, Optional, Type, Union
+from typing import Dict, Any, Optional, Type, Union, List
 import logging
-from abc import ABC, abstractmethod
 
 from atomic_agents.agents.base_agent import BaseAgent
 from atomic_agents.lib.base.base_io_schema import BaseIOSchema
@@ -34,6 +33,11 @@ from llai.agents.context_providers import (
 from llai.config.settings import AppConfig
 from llai.utils.exceptions_atomic import AgentFactoryError
 from llai.utils.logging_setup import get_logger
+from llai.bridge.llm_client_manager import (
+    LLMClientManager,
+    MockLLMClientManager,
+    create_llm_client_manager
+)
 
 logger = get_logger(__name__)
 
@@ -48,43 +52,6 @@ class LegalAgentFactoryConfig(BaseIOSchema):
     ethical_guideline_provider_config: Optional[EthicalGuidelineProviderConfig] = Field(None, description="Configuration for ethical guideline provider")
     default_jurisdiction: str = Field("ON", description="Default jurisdiction for agents")
     enable_audit_logging: bool = Field(True, description="Whether to enable audit logging by default")
-
-
-# --- LLM Client Manager Interface ---
-
-class LLMClientManager(ABC):
-    """Abstract interface for LLM client management."""
-    
-    @abstractmethod
-    def get_client(self, model_name: str) -> Any:
-        """Get an LLM client for the specified model."""
-        pass
-    
-    @abstractmethod
-    def get_default_client(self) -> Any:
-        """Get the default LLM client."""
-        pass
-
-
-class MockLLMClientManager(LLMClientManager):
-    """Mock LLM client manager for testing."""
-    
-    def __init__(self):
-        self.clients = {}
-    
-    def get_client(self, model_name: str) -> Any:
-        """Get a mock client for the specified model."""
-        if model_name not in self.clients:
-            # Return a mock client object
-            self.clients[model_name] = type('MockClient', (), {
-                'model': model_name,
-                'generate': lambda self, prompt: f"Mock response for: {prompt[:50]}..."
-            })()
-        return self.clients[model_name]
-    
-    def get_default_client(self) -> Any:
-        """Get the default mock client."""
-        return self.get_client("gpt-4o-mini")
 
 
 # --- Legal Agent Factory ---
@@ -389,6 +356,7 @@ class LegalAgentFactory:
 def create_legal_agent_factory(
     global_config: AppConfig,
     use_mock_providers: bool = False,
+    use_mock_llm: bool = False,
     **factory_config_kwargs
 ) -> LegalAgentFactory:
     """
@@ -396,14 +364,18 @@ def create_legal_agent_factory(
     
     Args:
         global_config: Global application configuration
-        use_mock_providers: Whether to use mock providers
+        use_mock_providers: Whether to use mock providers for context providers
+        use_mock_llm: Whether to use mock LLM clients instead of real ones
         **factory_config_kwargs: Additional factory configuration
         
     Returns:
         Configured legal agent factory
     """
-    # Create LLM client manager
-    llm_client_manager = MockLLMClientManager()  # In production, this would be a real implementation
+    # Create LLM client manager - use real implementation by default
+    llm_client_manager = create_llm_client_manager(
+        config=global_config,
+        use_mock=use_mock_llm
+    )
     
     # Create factory configuration
     factory_config = LegalAgentFactoryConfig(
@@ -418,5 +390,5 @@ def create_legal_agent_factory(
         factory_config=factory_config
     )
     
-    logger.info("Legal agent factory created and configured")
+    logger.info(f"Legal agent factory created and configured (mock_providers={use_mock_providers}, mock_llm={use_mock_llm})")
     return factory

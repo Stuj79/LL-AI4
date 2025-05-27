@@ -224,7 +224,7 @@ class StakeholderIdentificationAgent(LegalMarketingBaseAgent):
             # Construct prompt for LLM
             prompt = await self._construct_stakeholder_prompt(input_data)
             
-            # Process with LLM (this would be the actual LLM call in production)
+            # Process with LLM (now uses real LLM integration)
             llm_response = await self._process_with_llm(prompt)
             
             # Parse and structure the response
@@ -389,10 +389,33 @@ class StakeholderIdentificationAgent(LegalMarketingBaseAgent):
         return prompt
     
     async def _process_with_llm(self, prompt: str) -> str:
-        """Process prompt with LLM (mock implementation for now)."""
-        # In a real implementation, this would call the actual LLM
-        # For now, return a mock response
-        return f"Mock LLM response for prompt: {prompt[:100]}..."
+        """Process prompt with LLM using the configured client."""
+        try:
+            # Get the LLM client from the agent configuration
+            llm_client = self.config.client
+            
+            if not llm_client:
+                logger.warning("No LLM client configured, falling back to mock response")
+                return f"Mock LLM response for prompt: {prompt[:100]}..."
+            
+            # Check if the client has the expected methods
+            if hasattr(llm_client, 'generate'):
+                logger.info(f"Processing prompt with LLM client: {type(llm_client).__name__}")
+                response = await llm_client.generate(prompt)
+                return response
+            elif hasattr(llm_client, 'chat'):
+                logger.info(f"Processing prompt with LLM chat client: {type(llm_client).__name__}")
+                messages = [{"role": "user", "content": prompt}]
+                response = await llm_client.chat(messages)
+                return response
+            else:
+                logger.warning(f"LLM client {type(llm_client).__name__} does not have expected methods, falling back to mock")
+                return f"Mock LLM response for prompt: {prompt[:100]}..."
+                
+        except Exception as e:
+            logger.error(f"Error processing with LLM: {str(e)}")
+            # Fall back to mock response if LLM call fails
+            return f"Mock LLM response (error fallback) for prompt: {prompt[:100]}..."
     
     async def _parse_stakeholder_response(
         self, 

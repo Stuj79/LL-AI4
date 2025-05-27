@@ -116,7 +116,63 @@ This file contains curated, summarized, and actionable insights derived from `ra
 - Use structured documentation systems (Memory Bank) for context preservation
 - *Rationale:* Better decision-making, improved onboarding, knowledge preservation across team changes
 
+## Legal Marketing AI Domain Patterns
+
+**Pattern: Legal Marketing Base Agent Architecture**
+- Extend Atomic Agents BaseAgent with domain-specific compliance features including disclaimer management, compliance checking, and confidentiality handling
+- Implement structured audit logging for legal compliance requirements with configurable detail levels
+- Provide post-processing pipeline that automatically applies legal marketing compliance features
+- Include specialized configuration schemas with legal-specific fields (jurisdiction, compliance thresholds, audit levels)
+- *Rationale:* Legal marketing AI requires specialized compliance features that must be built into the foundation level to ensure consistent application across all agents
+
+**Pattern: Context Provider Architecture for Domain Knowledge**
+- Create abstract provider interfaces (DisclaimerProvider, AdvertisingRuleProvider, EthicalGuidelineProvider) for domain-specific knowledge injection
+- Implement both file-based and mock providers to support production and testing scenarios
+- Include caching mechanisms and error handling for performance and reliability
+- Enable clean separation of domain knowledge from agent logic for better maintainability
+- *Rationale:* Separates domain expertise from agent implementation, enables flexible knowledge sources, improves testability and maintainability
+
+**Pattern: Agent Factory Pattern for Complex Configurations**
+- Implement factory pattern for consistent agent instantiation with dependency injection
+- Manage LLM client selection, context provider setup, and configuration validation centrally
+- Include agent registry for extensibility and test agent creation utilities
+- Provide configuration validation and meaningful error messages for setup issues
+- *Rationale:* Complex agent configurations require centralized management to ensure consistency, proper dependency injection, and ease of testing
+
+## Agent Migration Strategies
+
+**Pattern: Foundation-First Migration Approach**
+- Establish base agent classes and patterns before migrating individual agents
+- Start with simpler, self-contained agents to validate patterns before tackling complex agents
+- Implement comprehensive testing infrastructure early to provide confidence throughout migration
+- Maintain functional parity while adding domain-specific enhancements
+- *Rationale:* Reduces risk by validating patterns early, accelerates subsequent migrations, ensures consistent implementation across agents
+
+**Pattern: Compliance-Integrated Agent Design**
+- Integrate legal marketing compliance requirements at the agent foundation level rather than as add-ons
+- Implement automatic disclaimer injection, compliance validation, and confidentiality protection as core features
+- Include audit logging and transparency features for regulatory compliance
+- Design specialized input/output schemas that include compliance status and applied disclaimers
+- *Rationale:* Legal marketing domain requires compliance features to be fundamental rather than optional, ensuring consistent application and reducing compliance risks
+
+## Testing Patterns for Legal Marketing AI
+
+**Pattern: Comprehensive Legal Marketing Agent Testing**
+- Implement unit tests for base agent functionality including disclaimer injection, compliance validation, and audit logging
+- Create integration tests for complete agent workflows with mock LLM providers
+- Include property-based tests for consistent behavior validation across input variations
+- Implement compliance validation tests to ensure legal marketing requirements are met
+- Add performance tests comparing against baseline implementations
+- *Rationale:* Legal marketing AI requires comprehensive testing to ensure compliance features work correctly, performance is acceptable, and behavior is consistent
+
+**Pattern: Mock Provider Testing Strategy**
+- Create sophisticated mock providers for disclaimers, advertising rules, and ethical guidelines
+- Enable deterministic testing of agent logic without external dependencies
+- Include error simulation capabilities for testing error handling scenarios
+- Provide realistic test data that covers various jurisdictions and content types
+- *Rationale:* Enables reliable testing of legal marketing features, reduces external dependencies, allows comprehensive error scenario testing
+
 ---
 
-**Last Updated:** 2025-05-25  
-**Source Material:** Raw reflection logs from Weeks 1-3 of Legion to Atomic Agents migration
+**Last Updated:** 2025-05-27  
+**Source Material:** Raw reflection logs from Weeks 1-5 of Legion to Atomic Agents migration
